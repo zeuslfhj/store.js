@@ -53,11 +53,11 @@ module.exports = (function() {
 				delete store.memoryCache[key];
 				return null;
 			}
-			storage[key] = store.serialize(val);
+			store.memoryCache[key] = store.serialize(val);
 			return val;
 		}
 		store.get = function(key, defaultVal) {
-			if (!!store.memoryCache[key]) {
+			if (!store.memoryCache[key]) {
 				return defaultVal;
 			}
 

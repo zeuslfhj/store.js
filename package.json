@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/marcuswestin/store.js#readme",
   "devDependencies": {
+    "browserify": "^13.1.1",
     "budo": "^7.1.0",
     "lodash": "^3.10.1",
     "ngrok": "^0.2.2",
