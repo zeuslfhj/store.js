@@ -10,6 +10,7 @@ module.exports = (function() {
 		storage
 
 	store.disabled = false
+	store.usePolyfill = false
 	store.version = '1.3.20'
 	store.set = function(key, value) {}
 	store.get = function(key, defaultVal) {}
@@ -43,6 +44,35 @@ module.exports = (function() {
 		if (typeof value != 'string') { return undefined }
 		try { return JSON.parse(value) }
 		catch(e) { return value || undefined }
+	}
+
+	function useMemoryPolyfill() {
+		store.memoryCache = {};
+		store.set = function(key, val) {
+			if (val === undefined) {
+				delete store.memoryCache[key];
+				return null;
+			}
+			storage[key] = store.serialize(val);
+			return val;
+		}
+		store.get = function(key, defaultVal) {
+			if (!!store.memoryCache[key]) {
+				return defaultVal;
+			}
+
+			var val = store.deserialize(store.memoryCache[key]);
+			return (val === undefined ? defaultVal : val)
+		}
+		store.remove = function(key) { delete store.memoryCache[key]; }
+		store.clear = function() { store.memoryCache = {}; }
+		store.forEach = function(callback) {
+			for (var key in store.memoryCache) {
+				if (store.memoryCache.hasOwnProperty(key)) {
+					callback(key, store.memoryCache[key]);
+				}
+			}
+		}
 	}
 
 	// Functions to encapsulate questionable FireFox 3.6.13 behavior
@@ -160,6 +190,8 @@ module.exports = (function() {
 		store.remove(testKey)
 	} catch(e) {
 		store.disabled = true
+		store.usePolyfill = true
+		useMemoryPolyfill()
 	}
 	store.enabled = !store.disabled
 	
